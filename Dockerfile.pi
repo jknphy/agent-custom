@@ -1,0 +1,18 @@
+FROM opensuse/tumbleweed
+
+# Install system dependencies required by Pi for tools, skills, and extensions,
+# plus mkmedia/xorriso for the modify-iso skill (SUSE-only packages, hence the
+# openSUSE base instead of Debian).
+RUN zypper --non-interactive install --no-recommends \
+      bash ca-certificates curl git ripgrep \
+      nodejs-default npm-default \
+      mkmedia xorriso \
+  && zypper clean --all
+
+# Install Pi coding agent globally
+RUN npm install -g @earendil-works/pi-coding-agent
+
+# Host ~/.pi/agent is deliberately not mounted (auth.json, sessions); state lives in the pi-agent-home volume.
+# pi-agent --dev mounts skills-custom (own) rw; default is ro. skills (downloaded) is always ro.
+WORKDIR /workspace
+ENTRYPOINT ["pi"]

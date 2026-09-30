@@ -1,0 +1,17 @@
+{
+  "defaultProvider": "anthropic-vertex",
+  "defaultModel": "claude-sonnet-5-5",
+  "packages": [
+    "npm:@twogiants/pi-anthropic-vertex",
+    "npm:pi-web-search"
+  ],
+  "skills": [
+    "/root/.pi/agent/skills-custom"
+  ],
+  "compaction": {
+    "enabled": true,
+    "reserveTokens": 64000,
+    "keepRecentTokens": 40000
+  },
+  "tuiMode": "fullscreen"
+}

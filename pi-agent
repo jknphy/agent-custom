@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# ~/.local/bin/pi-agent
+
+ENV_FLAGS=()
+if [ -f "$HOME/.agent-custom/.env" ]; then
+  ENV_FLAGS=(--env-file "$HOME/.agent-custom/.env")
+fi
+
+mkdir -p "$HOME/Downloads/isos"
+
+# --dev mounts skills-custom read-write; default is read-only
+SKILLS_MODE=ro
+ARGS=()
+for a in "$@"; do
+  if [ "$a" = "--dev" ]; then SKILLS_MODE=rw; else ARGS+=("$a"); fi
+done
+
+FLAGS=(
+  --rm
+  -it
+  "${ENV_FLAGS[@]}"
+  -e "GOOGLE_CLOUD_LOCATION=${GOOGLE_CLOUD_LOCATION:-global}"
+  -v "$HOME/.config/gcloud:/root/.config/gcloud:ro"
+  -v "$PWD:/workspace"
+  -v "pi-agent-home:/root/.pi/agent"  
+  -v "$HOME/.agent-custom/pi-settings.json:/root/.pi/agent/settings.json:ro"
+  -v "$HOME/.agent-custom/pi-models.json:/root/.pi/agent/models.json:ro"
+  -v "$HOME/.agent-custom/skills-custom:/root/.pi/agent/skills-custom:$SKILLS_MODE"
+  -v "$HOME/.agent-custom/skills:/root/.pi/agent/skills:ro"
+  -v "$HOME/.agent-custom/prompts:/root/.pi/agent/prompts:ro"
+  -v "$HOME/Downloads/isos:/root/Downloads/isos"
+)
+
+podman run "${FLAGS[@]}" pi-sandbox --approve "${ARGS[@]}"
