@@ -1,0 +1,54 @@
+{
+    "permission": {
+        "*": "deny",
+        "read": "allow",
+        "read:*": "allow",
+        "read_file": "allow",
+        "read_file:*": "allow",
+        "list_dir": "allow",
+        "list_dir:*": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "find": "allow",
+        "search": "allow",
+        "write": "deny",
+        "write:*": "deny",
+        "write_file": "deny",
+        "write_file:*": "deny",
+        "create_file": "deny",
+        "edit": "deny",
+        "edit_file": "deny",
+        "delete": "deny",
+        "delete_file": "deny",
+        "path": {
+            "**": "allow",
+            "**/.env*": "deny",
+            "**/*.pem": "deny",
+            "**/*.key": "deny",
+            "~/.ssh/**": "deny",
+            "~/.aws/**": "deny",
+            "~/.gcp/**": "deny"
+        },
+        "bash": {
+            "*": "deny",
+            "ls *": "allow",
+            "cat *": "allow",
+            "git status": "allow",
+            "git log *": "allow",
+            "git diff *": "allow",
+            "bash */download-iso/download.sh *": "allow",
+            "bash */modify-iso/modify.sh *": "allow"
+        },
+        "external_directory": {
+            "*": "deny",
+            "/root/.pi/agent/skills/download-iso/*": "allow",
+            "/root/.pi/agent/skills/modify-iso/*": "allow",
+            "/root/Downloads/isos/*": "allow"
+        },
+        "skill": {
+            "*": "deny",
+            "download-iso": "allow",
+            "modify-iso": "allow"
+        }
+    }
+}

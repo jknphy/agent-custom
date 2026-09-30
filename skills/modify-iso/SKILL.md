@@ -1,0 +1,14 @@
+---
+name: modify-iso
+description: "Patch a downloaded install ISO for testing by injecting bootloader/kernel parameters, e.g. to set the live password or point at a registration server. Use only when the user asks to modify/patch/customize an already-downloaded .iso for testing."
+---
+
+# Modify ISO
+
+Run this exact command and no other, with the ISO path and optional flags — do not add pipes, redirection, `timeout`, or any other wrapper around it:
+
+```bash
+bash /root/.pi/agent/skills/modify-iso/modify.sh "<iso-path>" [--password "<password>"] [<boot-param> ...]
+```
+
+`live.password=<password>` is always injected as a boot parameter (password defaults to `nots3cr3t`). Any additional arguments are passed through verbatim as extra kernel boot parameters, e.g. `inst.register_url=http://example.com`. On success it prints the path to the new, modified ISO; the source ISO is never changed.

@@ -1,0 +1,14 @@
+{
+  "defaultProvider": "anthropic-vertex",
+  "defaultModel": "claude-sonnet-5-5",
+  "packages": [
+    "npm:@twogiants/pi-anthropic-vertex",
+    "npm:@gotgenes/pi-permission-system"
+  ],
+  "compaction": {
+    "enabled": true,
+    "reserveTokens": 64000,
+    "keepRecentTokens": 40000
+  },
+  "tuiMode": "fullscreen"
+}
