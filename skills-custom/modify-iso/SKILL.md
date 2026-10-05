@@ -5,6 +5,18 @@ description: "Patch a downloaded install ISO for testing by injecting bootloader
 
 # Modify ISO
 
+## Choosing the ISO
+
+Unless the user gave an explicit ISO path, first list the candidates:
+
+```bash
+ls -1 ~/Downloads/isos/*.iso
+```
+
+Then ask the user which one to use (numbered list of filenames) and wait for their answer. If only one ISO exists, still confirm it with the user. If none exist, tell the user and stop. Use the full expanded path `~/Downloads/isos/<chosen>` as `<iso-path>` below.
+
+## Running
+
 Run this exact command and no other, with the ISO path and optional flags — do not add pipes, redirection, `timeout`, or any other wrapper around it:
 
 ```bash

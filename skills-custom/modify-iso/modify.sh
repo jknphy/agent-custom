@@ -46,7 +46,8 @@ done
 # mkmedia only needs root to loop-mount an iso *file*; feeding it an
 # already-unpacked directory avoids that mount entirely (unprivileged).
 tmpdir="$(mktemp -d)"
-trap 'rm -rf "$tmpdir"' EXIT
+# extracted ISO files are read-only; make them writable or rm fails
+trap 'chmod -R u+w "$tmpdir"; rm -rf "$tmpdir"' EXIT
 xorriso -indev "$iso" -osirrox on -extract / "$tmpdir" >/dev/null
 
 mkmedia --create "$out" --boot "$boot_params" "$tmpdir"

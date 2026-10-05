@@ -1,6 +1,13 @@
 {
   "defaultProvider": "anthropic-vertex",
   "defaultModel": "claude-sonnet-5-5",
+  "enabledModels": [
+    "gemini-3.1-pro-preview",
+    "gemini-3.8-flash",
+    "claude-sonnet-5-5",
+    "claude-haiku-4-5",
+    "claude-opus-5-5"
+  ],
   "packages": [
     "npm:@twogiants/pi-anthropic-vertex",
     "npm:pi-web-search"
@@ -13,5 +20,6 @@
     "reserveTokens": 64000,
     "keepRecentTokens": 40000
   },
-  "tuiMode": "fullscreen"
+  "tuiMode": "fullscreen",
+  "enableInstallTelemetry": false
 }
