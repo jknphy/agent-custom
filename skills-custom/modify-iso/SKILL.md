@@ -20,7 +20,9 @@ Then ask the user which one to use (numbered list of filenames) and wait for the
 Run this exact command and no other, with the ISO path and optional flags — do not add pipes, redirection, `timeout`, or any other wrapper around it:
 
 ```bash
-bash /root/.pi/agent/skills-custom/modify-iso/modify.sh "<iso-path>" [--password "<password>"] [<boot-param> ...]
+bash /root/.pi/agent/skills-custom/modify-iso/modify.sh "<iso-path>" [--password "<password>"] [--grub-timeout <seconds>] [<boot-param> ...]
 ```
 
-`live.password=<password>` is always injected as a boot parameter (password defaults to `nots3cr3t`). Any additional arguments are passed through verbatim as extra kernel boot parameters, e.g. `inst.register_url=http://example.com`. On success it prints the path to the new, modified ISO; the source ISO is never changed.
+`live.password=<password>` is always injected as a boot parameter (password defaults to `nots3cr3t`). The grub menu timeout is set to `3` seconds by default; use `--grub-timeout <seconds>` to change it (e.g. `0` to boot immediately).
+
+Any additional arguments are passed through verbatim as extra kernel boot parameters, e.g. `inst.register_url=http://example.com`. On success it prints the path to the new, modified ISO; the source ISO is never changed.

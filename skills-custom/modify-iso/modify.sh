@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-iso="${1:?usage: modify.sh <iso-path> [--password <pw>] [boot-param ...]}"
+iso="${1:?usage: modify.sh <iso-path> [--password <pw>] [--grub-timeout <sec>] [boot-param ...]}"
 shift
 
 password="nots3cr3t"
+grub_timeout=3
 extra_params=()
 
 while [ $# -gt 0 ]; do
@@ -13,12 +14,20 @@ while [ $# -gt 0 ]; do
       password="${2:?--password requires a value}"
       shift 2
       ;;
+    --grub-timeout)
+      grub_timeout="${2:?--grub-timeout requires a value}"
+      shift 2
+      ;;
     *)
       extra_params+=("$1")
       shift
       ;;
   esac
 done
+
+case "$grub_timeout" in
+  ''|*[!0-9]*) echo "--grub-timeout must be a non-negative integer" >&2; exit 1 ;;
+esac
 
 case "$iso" in
   *.iso) ;;
@@ -49,6 +58,11 @@ tmpdir="$(mktemp -d)"
 # extracted ISO files are read-only; make them writable or rm fails
 trap 'chmod -R u+w "$tmpdir"; rm -rf "$tmpdir"' EXIT
 xorriso -indev "$iso" -osirrox on -extract / "$tmpdir" >/dev/null
+
+# set the grub menu timeout (the menu lives only in boot/grub2/grub.cfg)
+grub_cfg="$tmpdir/boot/grub2/grub.cfg"
+chmod -R u+w "$tmpdir"
+sed -i -E "s/^set timeout=.*/set timeout=$grub_timeout/" "$grub_cfg"
 
 mkmedia --create "$out" --boot "$boot_params" "$tmpdir"
 
