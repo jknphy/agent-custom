@@ -77,7 +77,7 @@ done
 
 mkdir -p "$HOME/Downloads/isos"
 
-# --dev mounts skills-custom read-write; default is read-only
+# --dev mounts skills-custom and pi-extensions-custom read-write; default is read-only
 SKILLS_MODE=ro
 ARGS=()
 for a in "$@"; do
@@ -109,6 +109,7 @@ FLAGS=(
   -v "$HOME/.agent-custom/skills-custom:/root/.pi/agent/skills-custom:$SKILLS_MODE"
   -v "$HOME/.agent-custom/skills:/root/.pi/agent/skills:ro"
   -v "$HOME/.agent-custom/prompts:/root/.pi/agent/prompts:ro"
+  -v "$HOME/.agent-custom/pi-extensions-custom:/root/.pi/agent/extensions:$SKILLS_MODE"
   -v "$HOME/Downloads/isos:/root/Downloads/isos"
 )
 

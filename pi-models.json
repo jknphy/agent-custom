@@ -9,6 +9,17 @@
           "contextWindow": 320000
         }
       }
+    },
+    "ollama": {
+      "baseUrl": "http://coding.op-prg2-gpu-1-ingress.op.suse.org/v1",
+      "api": "openai-completions",
+      "apiKey": "ollama",
+      "models": [
+        {
+          "id": "default:latest",
+          "name": "Ollama (SUSE) default"
+        }
+      ]
     }
   }
 }
