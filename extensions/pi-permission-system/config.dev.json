@@ -1,0 +1,29 @@
+{
+  "permission": {
+    "*": "allow",
+    "path": {
+      "**": "allow",
+      "**/.env*": "deny",
+      "**/*.pem": "deny",
+      "**/*.key": "deny",
+      "~/.ssh/**": "deny",
+      "~/.aws/**": "deny",
+      "~/.gcp/**": "deny"
+    },
+    "bash": {
+      "*": "allow",
+      "rm -rf *": "ask",
+      "git push *": "ask",
+      "git reset --hard *": "ask",
+      "sudo *": "deny"
+    },
+    "external_directory": {
+      "*": "ask",
+      "/root/.pi/agent/*": "allow",
+      "/root/Downloads/isos/*": "allow"
+    },
+    "skill": {
+      "*": "allow"
+    }
+  }
+}

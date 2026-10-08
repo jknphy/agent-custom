@@ -2,7 +2,7 @@
 
 # ~/.local/bin/pi-agent
 #   pi-agent secret set|ls|rm <NAME>  manage env secrets injected into the agent
-#   pi-agent [--dev] [args]           run the agent
+#   pi-agent [--profile NAME] [args]  run the agent (profile: restricted (default) | dev)
 
 set -euo pipefail
 
@@ -29,13 +29,26 @@ for n in $(podman secret ls --format '{{.Name}}' | sed -n 's/^pisbx-//p'); do
 done
 
 mkdir -p "$HOME/Downloads/isos"
+# logs dir must exist on the host before the bind mount below
+mkdir -p "$HOME/.agent-custom/extensions/pi-permission-system/logs"
 
-# --dev mounts skills-custom, pi-extensions-custom and APPEND_SYSTEM.md read-write; default is read-only
-SKILLS_MODE=ro
+# Profiles pick the pi-permission-system config and the mount mode:
+#   restricted (default): config.json, own dirs read-only (unattended runs)
+#   dev: config.dev.json, own dirs read-write (interactive skill/extension development)
+PROFILE=restricted
 ARGS=()
-for a in "$@"; do
-  if [ "$a" = "--dev" ]; then SKILLS_MODE=rw; else ARGS+=("$a"); fi
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --profile) PROFILE="${2:?--profile needs a name}"; shift 2 ;;
+    *) ARGS+=("$1"); shift ;;
+  esac
 done
+PERM_DIR="$HOME/.agent-custom/extensions/pi-permission-system"
+case "$PROFILE" in
+  restricted) MODE=ro; PERM_CFG="$PERM_DIR/config.json" ;;
+  dev)        MODE=rw; PERM_CFG="$PERM_DIR/config.dev.json" ;;
+  *) echo "unknown profile: $PROFILE (restricted|dev)" >&2; exit 1 ;;
+esac
 
 FLAGS=(
   --rm
@@ -45,19 +58,24 @@ FLAGS=(
   "${ENV_FLAGS[@]}"
   "${SECRET_FLAGS[@]}"
   -e "GOOGLE_CLOUD_LOCATION=${GOOGLE_CLOUD_LOCATION:-global}"
-  -v "$HOME/.config/gcloud:/root/.config/gcloud:ro"
+  -e GOOGLE_APPLICATION_CREDENTIALS=/root/adc.json
+  -v "$HOME/.config/gcloud/application_default_credentials.json:/root/adc.json:ro"
   -v "$PWD:/workspace"
   # TODO(parallel agents): this volume is shared by every instance, so concurrent
   # agents can clash on sessions/auth. Make the name per-project, e.g.
   # "pi-agent-home-$(basename "$PWD")" (trade-off: separate sessions/login per project).
   -v "pi-agent-home:/root/.pi/agent"
-  -v "$HOME/.agent-custom/pi-settings.json:/root/.pi/agent/settings.json:ro"
-  -v "$HOME/.agent-custom/pi-models.json:/root/.pi/agent/models.json:ro"
-  -v "$HOME/.agent-custom/APPEND_SYSTEM.md:/root/.pi/agent/APPEND_SYSTEM.md:$SKILLS_MODE"
-  -v "$HOME/.agent-custom/skills-custom:/root/.pi/agent/skills-custom:$SKILLS_MODE"
-  -v "$HOME/.agent-custom/skills:/root/.pi/agent/skills:ro"
-  -v "$HOME/.agent-custom/prompts:/root/.pi/agent/prompts:ro"
-  -v "$HOME/.agent-custom/pi-extensions-custom:/root/.pi/agent/extensions:$SKILLS_MODE"
+  -v "$HOME/.agent-custom/pi-settings.json:/root/.pi/agent/settings.json:$MODE"
+  -v "$HOME/.agent-custom/pi-models.json:/root/.pi/agent/models.json:$MODE"
+  -v "$HOME/.agent-custom/web-search.json:/root/.pi/agent/web-search.json:$MODE"
+  -v "$HOME/.agent-custom/APPEND_SYSTEM.md:/root/.pi/agent/APPEND_SYSTEM.md:$MODE"
+  -v "$HOME/.agent-custom/skills-custom:/root/.pi/agent/skills-custom:$MODE"
+  -v "$HOME/.agent-custom/skills:/root/.pi/agent/skills:$MODE"
+  -v "$HOME/.agent-custom/prompts:/root/.pi/agent/prompts:$MODE"
+  -v "$HOME/.agent-custom/extensions-custom:/root/.pi/agent/extensions-custom:$MODE"
+  -v "$PERM_DIR:/root/.pi/agent/extensions/pi-permission-system:ro"
+  -v "$PERM_DIR/logs:/root/.pi/agent/extensions/pi-permission-system/logs"
+  -v "$PERM_CFG:/root/.pi/agent/extensions/pi-permission-system/config.json:ro"
   -v "$HOME/Downloads/isos:/root/Downloads/isos"
 )
 

@@ -11,8 +11,13 @@
   ],
   "packages": [
     "npm:@twogiants/pi-anthropic-vertex",
+    "npm:@gotgenes/pi-permission-system",
     "npm:pi-web-access",
-    "git:github.com/ayghri/i-have-adhd"
+    "git:github.com/ayghri/i-have-adhd",
+    "npm:@dietrichgebert/ponytail"
+  ],
+  "extensions": [
+    "/root/.pi/agent/extensions-custom"
   ],
   "skills": [
     "/root/.pi/agent/skills-custom"
@@ -23,5 +28,6 @@
     "keepRecentTokens": 40000
   },
   "tuiMode": "fullscreen",
-  "enableInstallTelemetry": false
+  "enableInstallTelemetry": false,
+  "lastChangelogVersion": "1.1.0"
 }

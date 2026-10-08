@@ -19,6 +19,6 @@ ENV NODE_EXTRA_CA_CERTS=/etc/pki/trust/anchors/suse-ca.crt
 RUN npm install -g @earendil-works/pi-coding-agent
 
 # Host ~/.pi/agent is deliberately not mounted (auth.json, sessions); state lives in the pi-agent-home volume.
-# pi-agent --dev mounts skills-custom + pi-extensions-custom (own) rw; default is ro. skills (downloaded) is always ro.
+# pi-agent --profile dev mounts own dirs, skills and prompts rw and uses config.dev.json; default (restricted) is ro.
 WORKDIR /workspace
 ENTRYPOINT ["pi"]
