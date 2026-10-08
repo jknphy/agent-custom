@@ -10,10 +10,11 @@ RUN zypper --non-interactive install --no-recommends \
   && zypper clean --all
 
 # SUSE internal CA (openqa.suse.de etc.)
-COPY suse-ca.crt /etc/pki/trust/anchors/
-RUN update-ca-certificates
+RUN zypper --non-interactive addrepo -r https://download.opensuse.org/repositories/SUSE:/CA/openSUSE_Tumbleweed/SUSE:CA.repo \
+  && zypper --non-interactive --gpg-auto-import-keys install --no-recommends ca-certificates-suse \
+  && zypper clean --all
 # Node uses its own bundled CA list, not the system one
-ENV NODE_EXTRA_CA_CERTS=/etc/pki/trust/anchors/suse-ca.crt
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/ca-bundle.pem
 
 # Install Pi coding agent globally
 RUN npm install -g @earendil-works/pi-coding-agent

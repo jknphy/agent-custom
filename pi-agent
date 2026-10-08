@@ -58,6 +58,7 @@ FLAGS=(
   "${ENV_FLAGS[@]}"
   "${SECRET_FLAGS[@]}"
   -e "GOOGLE_CLOUD_LOCATION=${GOOGLE_CLOUD_LOCATION:-global}"
+  -e "PI_PROFILE=$PROFILE"
   -e GOOGLE_APPLICATION_CREDENTIALS=/root/adc.json
   -v "$HOME/.config/gcloud/application_default_credentials.json:/root/adc.json:ro"
   -v "$PWD:/workspace"

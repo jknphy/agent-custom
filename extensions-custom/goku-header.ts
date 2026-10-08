@@ -31,6 +31,7 @@ const ORANGE = "\x1b[38;2;255;140;0m";
 const RESET = "\x1b[0m";
 
 export default function (pi: ExtensionAPI) {
+	if (process.env.PI_PROFILE !== "dev") return; // production keeps the default header
 	pi.on("session_start", async (_event, ctx) => {
 		if (ctx.mode !== "tui") return;
 		ctx.ui.setHeader((_tui, theme) => ({
