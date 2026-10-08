@@ -22,7 +22,6 @@ The agent can read the project (`$PWD` mounted at `/workspace`) and the mounted 
 
 ```bash
 pi-sandbox [--profile restricted|dev] [args]  # run the agent in a fresh --rm container
-pi-sandbox secret set|ls|rm <NAME>    # env secrets (tokens), stored in podman secrets
 ```
 
 Profiles select the pi-permission-system config (`extensions/pi-permission-system/`) and mount mode:
@@ -31,7 +30,6 @@ Profiles select the pi-permission-system config (`extensions/pi-permission-syste
 |---|---|---|
 | `restricted` (default) | `config.json`: deny-by-default, for unattended tasks | all read-only |
 | `dev` | `config.dev.json`: allow-by-default, `ask` for destructive bash/external dirs | `skills-custom`, `skills`, `prompts`, `extensions-custom`, `APPEND_SYSTEM.md`, `pi-settings.json`, `pi-models.json`, `web-search.json` read-write |
- Secrets are injected as env vars of the same name.
 
 Non-sensitive config (project ID, region) goes in `.env` (see `.env.example`).
 

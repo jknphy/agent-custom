@@ -1,32 +1,14 @@
 #!/usr/bin/env bash
 
 # ~/.local/bin/pi-sandbox
-#   pi-sandbox secret set|ls|rm <NAME>  manage env secrets injected into the agent
 #   pi-sandbox [--profile NAME] [args]  run the agent (profile: restricted (default) | dev)
 
 set -euo pipefail
-
-case "${1:-}" in
-  secret)
-    case "${2:-}" in
-      set) read -rsp "$3 value: " v; echo
-           printf %s "$v" | podman secret create --replace "pisbx-$3" - >/dev/null ;;
-      ls)  podman secret ls --format '{{.Name}}' | sed -n 's/^pisbx-//p' ;;
-      rm)  podman secret rm "pisbx-$3" ;;
-      *)   echo "usage: pi-sandbox secret set|ls|rm <NAME>" >&2; exit 1 ;;
-    esac
-    exit ;;
-esac
 
 ENV_FLAGS=()
 if [ -f "$HOME/Code/pi-sandbox/.env" ]; then
   ENV_FLAGS=(--env-file "$HOME/Code/pi-sandbox/.env")
 fi
-
-SECRET_FLAGS=()
-for n in $(podman secret ls --format '{{.Name}}' | sed -n 's/^pisbx-//p'); do
-  SECRET_FLAGS+=(--secret "pisbx-$n,type=env,target=$n")
-done
 
 mkdir -p "$HOME/Downloads/isos"
 # logs dir must exist on the host before the bind mount below
@@ -56,7 +38,6 @@ FLAGS=(
   --cap-drop=ALL
   --security-opt no-new-privileges
   "${ENV_FLAGS[@]}"
-  "${SECRET_FLAGS[@]}"
   -e "GOOGLE_CLOUD_LOCATION=${GOOGLE_CLOUD_LOCATION:-global}"
   -e "PI_PROFILE=$PROFILE"
   -e GOOGLE_APPLICATION_CREDENTIALS=/root/adc.json
@@ -78,6 +59,7 @@ FLAGS=(
   -v "$PERM_DIR/logs:/root/.pi/agent/extensions/pi-permission-system/logs"
   -v "$PERM_CFG:/root/.pi/agent/extensions/pi-permission-system/config.json:ro"
   -v "$HOME/Downloads/isos:/root/Downloads/isos"
+  -v "$HOME/Code/pi-sandbox/client.conf:/root/.config/openqa/client.conf:ro"
 )
 
 podman run "${FLAGS[@]}" pi-sandbox --approve "${ARGS[@]}"

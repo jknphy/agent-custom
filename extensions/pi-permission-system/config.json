@@ -25,6 +25,7 @@
       "**/.env*": "deny",
       "**/*.pem": "deny",
       "**/*.key": "deny",
+      "*client.conf": "deny",
       "~/.ssh/**": "deny",
       "~/.aws/**": "deny",
       "~/.gcp/**": "deny"
@@ -38,7 +39,16 @@
       "git diff *": "allow",
       "bash */download-iso/download.sh *": "allow",
       "bash */modify-iso/modify.sh *": "allow",
-      "bash */prepare-iso/prepare.sh *": "allow"
+      "bash */prepare-iso/prepare.sh *": "allow",
+      "openqa-cli api --host https://openqa.suse.de *": "allow",
+      "openqa-cli *-X*": "deny",
+      "openqa-cli *--method*": "deny",
+      "openqa-cli * -d*": "deny",
+      "openqa-cli * --data*": "deny",
+      "openqa-cli * -D*": "deny",
+      "openqa-cli * --json*": "deny",
+      "openqa-cli * -f*": "deny",
+      "openqa-cli * --form*": "deny"
     },
     "external_directory": {
       "*": "deny",

@@ -6,7 +6,7 @@ FROM opensuse/tumbleweed
 RUN zypper --non-interactive install --no-recommends \
       bash ca-certificates curl git ripgrep python3 jq \
       nodejs-default npm-default \
-      mkmedia xorriso \
+      mkmedia xorriso openQA-client \
   && zypper clean --all
 
 # SUSE internal CA (openqa.suse.de etc.)

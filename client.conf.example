@@ -1,0 +1,4 @@
+# Copy to client.conf (gitignored) and fill in; mounted read-only for openqa-cli
+[openqa.suse.de]
+key = your-api-key
+secret = your-api-secret
