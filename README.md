@@ -1,4 +1,4 @@
-# agent-custom
+# pi-sandbox
 
 Personal setup for running the [Pi coding agent](https://www.npmjs.com/package/@earendil-works/pi-coding-agent)
 in a rootless podman container, with custom skills, prompts and a TUI header extension.
@@ -8,7 +8,7 @@ The agent can read the project (`$PWD` mounted at `/workspace`) and the mounted 
 
 | Path | What |
 |---|---|
-| `pi-agent` | Launcher script (install as `~/.local/bin/pi-agent`) |
+| `pi-sandbox` | Launcher script (install as `~/.local/bin/pi-sandbox`) |
 | `Dockerfile.pi` | Image `pi-sandbox`: openSUSE Tumbleweed + Node, ripgrep, jq, mkmedia, xorriso, SUSE CA |
 | `pi-settings.json`, `pi-models.json`, `web-search.json` | Pi config, mounted read-only (default model, Vertex/Ollama providers, packages, web-search) |
 | `APPEND_SYSTEM.md` | Extra system prompt |
@@ -21,8 +21,8 @@ The agent can read the project (`$PWD` mounted at `/workspace`) and the mounted 
 ## Usage
 
 ```bash
-pi-agent [--profile restricted|dev] [args]  # run the agent in a fresh --rm container
-pi-agent secret set|ls|rm <NAME>    # env secrets (tokens), stored in podman secrets
+pi-sandbox [--profile restricted|dev] [args]  # run the agent in a fresh --rm container
+pi-sandbox secret set|ls|rm <NAME>    # env secrets (tokens), stored in podman secrets
 ```
 
 Profiles select the pi-permission-system config (`extensions/pi-permission-system/`) and mount mode:
@@ -38,13 +38,13 @@ Non-sensitive config (project ID, region) goes in `.env` (see `.env.example`).
 ## Rebuilding the agent image
 
 ```bash
-cd ~/.agent-custom
+cd ~/Code/pi-sandbox
 podman build -f Dockerfile.pi -t pi-sandbox .
 # fresh Pi version / base image (the npm layer is otherwise cached):
 podman build --no-cache --pull=newer -f Dockerfile.pi -t pi-sandbox .
 ```
 
-No restart needed: each `pi-agent` run starts a new container from the image.
+No restart needed: each `pi-sandbox` run starts a new container from the image.
 State lives in the `pi-agent-home` volume and survives rebuilds.
 
 ## Sandbox
