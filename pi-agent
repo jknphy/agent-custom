@@ -1,47 +1,12 @@
 #!/usr/bin/env bash
 
 # ~/.local/bin/pi-agent
-#   pi-agent allow|deny <domain>...   edit egress allowlist (live reload)
-#   pi-agent list                     show allowlist
 #   pi-agent secret set|ls|rm <NAME>  manage env secrets injected into the agent
 #   pi-agent [--dev] [args]           run the agent
 
 set -euo pipefail
 
-CFG="$HOME/.config/pi-agent"
-ALLOW="$HOME/.agent-custom/allowed-domains.txt"
-CONF="$CFG/squid.conf"
-NET=pi-agent-net
-PROXY=pi-agent-proxy
-# Fixed IP for the proxy: internal networks may lack name resolution, so the
-# agent is pointed at an address instead of a hostname. Any private range that
-# doesn't clash with your LAN/VPN works.
-PROXY_IP=10.89.77.2
-# 3128 is squid's default port (convention, nothing special).
-PROXY_PORT=3128
-
-mkdir -p "$CFG"
-touch "$ALLOW"
-[ -f "$CONF" ] || printf 'http_port %s\nacl ok dstdomain "/etc/squid/allowed-domains.txt"\nhttp_access allow ok\nhttp_access deny all\n' "$PROXY_PORT" >"$CONF"
-
-reload() { podman exec "$PROXY" squid -k reconfigure 2>/dev/null || true; }
-
 case "${1:-}" in
-  allow)
-    shift
-    # leading dot = domain and all its subdomains
-    for d in "$@"; do grep -qxF ".$d" "$ALLOW" || echo ".$d" >>"$ALLOW"; done
-    reload; exit ;;
-  deny)
-    shift
-    for d in "$@"; do
-      { grep -vxF ".$d" "$ALLOW" || true; } >"$ALLOW.tmp"
-      cat "$ALLOW.tmp" >"$ALLOW"  # keep inode so the bind mount stays valid
-      rm -f "$ALLOW.tmp"
-    done
-    reload; exit ;;
-  list)
-    cat "$ALLOW"; exit ;;
   secret)
     case "${2:-}" in
       set) read -rsp "$3 value: " v; echo
@@ -52,18 +17,6 @@ case "${1:-}" in
     esac
     exit ;;
 esac
-
-# --- Egress control -----------------------------------------------------------
-# The agent sits on an --internal network: containers there can only talk to
-# each other, there is no route to the internet. The squid proxy is attached to
-# that network AND the normal "podman" network, so it is the agent's only way
-# out. It forwards a request only if the domain is in allowed-domains.txt.
-podman network exists "$NET" || podman network create --internal --subnet 10.89.77.0/24 "$NET" >/dev/null
-# --dns: the internal network's resolver resolves nothing (503s); use the corporate resolver (resolves internal + public names)
-podman start "$PROXY" >/dev/null 2>&1 || podman run -d --name "$PROXY" --dns 10.144.53.53 \
-  --network "$NET:ip=$PROXY_IP" --network podman \
-  -v "$ALLOW:/etc/squid/allowed-domains.txt:ro,Z" -v "$CONF:/etc/squid/squid.conf:ro,Z" \
-  docker.io/ubuntu/squid >/dev/null
 
 ENV_FLAGS=()
 if [ -f "$HOME/.agent-custom/.env" ]; then
@@ -87,14 +40,8 @@ done
 FLAGS=(
   --rm
   -it
-  --network "$NET"
   --cap-drop=ALL
   --security-opt no-new-privileges
-  # tools (npm, curl, node) send web traffic through the proxy;
-  # NODE_USE_ENV_PROXY makes Node 24's built-in fetch honor these too
-  -e "HTTP_PROXY=http://$PROXY_IP:$PROXY_PORT"
-  -e "HTTPS_PROXY=http://$PROXY_IP:$PROXY_PORT"
-  -e NODE_USE_ENV_PROXY=1
   "${ENV_FLAGS[@]}"
   "${SECRET_FLAGS[@]}"
   -e "GOOGLE_CLOUD_LOCATION=${GOOGLE_CLOUD_LOCATION:-global}"
@@ -106,7 +53,6 @@ FLAGS=(
   -v "pi-agent-home:/root/.pi/agent"
   -v "$HOME/.agent-custom/pi-settings.json:/root/.pi/agent/settings.json:ro"
   -v "$HOME/.agent-custom/pi-models.json:/root/.pi/agent/models.json:ro"
-  -v "$HOME/.agent-custom/pi-web-search.json:/root/.pi/agent/web-search.json:ro"
   -v "$HOME/.agent-custom/APPEND_SYSTEM.md:/root/.pi/agent/APPEND_SYSTEM.md:$SKILLS_MODE"
   -v "$HOME/.agent-custom/skills-custom:/root/.pi/agent/skills-custom:$SKILLS_MODE"
   -v "$HOME/.agent-custom/skills:/root/.pi/agent/skills:ro"
