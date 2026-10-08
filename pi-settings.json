@@ -5,13 +5,14 @@
     "gemini-3.1-pro-preview",
     "gemini-3.8-flash",
     "claude-sonnet-5-5",
-    "claude-haiku-4-5",
+    "claude-haiku-5-5",
     "claude-opus-5-5",
     "ollama/default:latest"
   ],
   "packages": [
     "npm:@twogiants/pi-anthropic-vertex",
-    "npm:pi-web-search"
+    "npm:pi-web-access",
+    "git:github.com/ayghri/i-have-adhd"
   ],
   "skills": [
     "/root/.pi/agent/skills-custom"

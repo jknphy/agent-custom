@@ -4,10 +4,16 @@ FROM opensuse/tumbleweed
 # plus mkmedia/xorriso for the modify-iso skill (SUSE-only packages, hence the
 # openSUSE base instead of Debian).
 RUN zypper --non-interactive install --no-recommends \
-      bash ca-certificates curl git ripgrep \
+      bash ca-certificates curl git ripgrep python3 jq \
       nodejs-default npm-default \
       mkmedia xorriso \
   && zypper clean --all
+
+# SUSE internal CA (openqa.suse.de etc.)
+COPY suse-ca.crt /etc/pki/trust/anchors/
+RUN update-ca-certificates
+# Node uses its own bundled CA list, not the system one
+ENV NODE_EXTRA_CA_CERTS=/etc/pki/trust/anchors/suse-ca.crt
 
 # Install Pi coding agent globally
 RUN npm install -g @earendil-works/pi-coding-agent

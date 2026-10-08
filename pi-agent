@@ -9,7 +9,7 @@
 set -euo pipefail
 
 CFG="$HOME/.config/pi-agent"
-ALLOW="$CFG/allow.txt"
+ALLOW="$HOME/.agent-custom/allowed-domains.txt"
 CONF="$CFG/squid.conf"
 NET=pi-agent-net
 PROXY=pi-agent-proxy
@@ -22,7 +22,7 @@ PROXY_PORT=3128
 
 mkdir -p "$CFG"
 touch "$ALLOW"
-[ -f "$CONF" ] || printf 'http_port %s\nacl ok dstdomain "/etc/squid/allow.txt"\nhttp_access allow ok\nhttp_access deny all\n' "$PROXY_PORT" >"$CONF"
+[ -f "$CONF" ] || printf 'http_port %s\nacl ok dstdomain "/etc/squid/allowed-domains.txt"\nhttp_access allow ok\nhttp_access deny all\n' "$PROXY_PORT" >"$CONF"
 
 reload() { podman exec "$PROXY" squid -k reconfigure 2>/dev/null || true; }
 
@@ -57,12 +57,12 @@ esac
 # The agent sits on an --internal network: containers there can only talk to
 # each other, there is no route to the internet. The squid proxy is attached to
 # that network AND the normal "podman" network, so it is the agent's only way
-# out. It forwards a request only if the domain is in allow.txt.
+# out. It forwards a request only if the domain is in allowed-domains.txt.
 podman network exists "$NET" || podman network create --internal --subnet 10.89.77.0/24 "$NET" >/dev/null
 # --dns: the internal network's resolver resolves nothing (503s); use the corporate resolver (resolves internal + public names)
 podman start "$PROXY" >/dev/null 2>&1 || podman run -d --name "$PROXY" --dns 10.144.53.53 \
   --network "$NET:ip=$PROXY_IP" --network podman \
-  -v "$ALLOW:/etc/squid/allow.txt:ro,Z" -v "$CONF:/etc/squid/squid.conf:ro,Z" \
+  -v "$ALLOW:/etc/squid/allowed-domains.txt:ro,Z" -v "$CONF:/etc/squid/squid.conf:ro,Z" \
   docker.io/ubuntu/squid >/dev/null
 
 ENV_FLAGS=()
@@ -77,7 +77,7 @@ done
 
 mkdir -p "$HOME/Downloads/isos"
 
-# --dev mounts skills-custom and pi-extensions-custom read-write; default is read-only
+# --dev mounts skills-custom, pi-extensions-custom and APPEND_SYSTEM.md read-write; default is read-only
 SKILLS_MODE=ro
 ARGS=()
 for a in "$@"; do
@@ -106,6 +106,8 @@ FLAGS=(
   -v "pi-agent-home:/root/.pi/agent"
   -v "$HOME/.agent-custom/pi-settings.json:/root/.pi/agent/settings.json:ro"
   -v "$HOME/.agent-custom/pi-models.json:/root/.pi/agent/models.json:ro"
+  -v "$HOME/.agent-custom/pi-web-search.json:/root/.pi/agent/web-search.json:ro"
+  -v "$HOME/.agent-custom/APPEND_SYSTEM.md:/root/.pi/agent/APPEND_SYSTEM.md:$SKILLS_MODE"
   -v "$HOME/.agent-custom/skills-custom:/root/.pi/agent/skills-custom:$SKILLS_MODE"
   -v "$HOME/.agent-custom/skills:/root/.pi/agent/skills:ro"
   -v "$HOME/.agent-custom/prompts:/root/.pi/agent/prompts:ro"

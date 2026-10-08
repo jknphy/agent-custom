@@ -1,0 +1,3 @@
+{
+  "ssrf": { "trustEnvProxy": true }
+}

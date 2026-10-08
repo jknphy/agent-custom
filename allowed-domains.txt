@@ -1,0 +1,11 @@
+.googleapis.com
+.registry.npmjs.org
+.pi.dev
+.download.suse.de
+.list
+.dist.suse.de
+.op.suse.org
+.openqa.suse.de
+.example.com
+.exa.ai
+.github.com
